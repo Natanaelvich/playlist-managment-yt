@@ -61,10 +61,10 @@ const PlaylistVideos = ({ accessToken, playlistId, onClose }: Props) => {
   }, [accessToken, playlistId]);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden dark:bg-gray-800">
+    <div className="w-full h-full flex justify-center items-center z-50 bg-gray-900 bg-opacity-80">
+      <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden text-gray-200">
         <button
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-200 focus:outline-none"
           onClick={onClose}
         >
           <svg
@@ -80,12 +80,14 @@ const PlaylistVideos = ({ accessToken, playlistId, onClose }: Props) => {
           </svg>
         </button>
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Playlist Videos</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-200">
+            Playlist Videos
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {videos.map((video) => (
               <div
                 key={video.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden dark:bg-gray-800"
+                className="bg-gray-700 rounded-lg shadow-md overflow-hidden"
               >
                 <img
                   src={video.snippet.thumbnails.medium.url}
@@ -93,10 +95,10 @@ const PlaylistVideos = ({ accessToken, playlistId, onClose }: Props) => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-6">
-                  <h3 className="text-lg font-medium mb-4">
+                  <h3 className="text-lg font-medium mb-4 text-gray-200">
                     {video.snippet.title}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-400">
                     {video.snippet.channelTitle}
                   </p>
                   <a
