@@ -1,9 +1,19 @@
+import PlayLists from "./pages/PlayLists";
 import SignInWithGoogle from "./pages/SignInWithGoogle";
+import { useTokenUserStore } from "./store/tokenUserSlice";
 import "./styles/main.css";
 
 function App() {
+  const { token } = useTokenUserStore();
+
   return (
-    <SignInWithGoogle />
+    <>
+      {token ? (
+        <PlayLists accessToken={token} />
+      ) : (
+        <SignInWithGoogle />
+      )}
+    </>
   );
 }
 
