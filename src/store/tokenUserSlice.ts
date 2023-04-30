@@ -1,12 +1,14 @@
-import {create} from 'zustand';
+import { create } from "zustand";
 
 type TokenUserState = {
-    token: string;
-    setToken: (token: string) => void;
+  token: string;
+  setToken: (token: string) => void;
 };
 
 export const useTokenUserStore = create<TokenUserState>((set) => ({
-    token: '',
-    setToken: (token) => set({ token }),
+  token: "",
+  setToken: (token) => {
+    localStorage.setItem("token", token);
+    set({ token });
+  },
 }));
-
