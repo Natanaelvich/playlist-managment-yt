@@ -83,10 +83,24 @@ const PlayLists = ({ accessToken }: Props) => {
     navigate(`/playlist-videos/${playlistId}`);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
+
   return (
     <div className="py-6 bg-gray-900 text-gray-200 h-screen">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-6">My Playlists</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold mb-6">My Playlists</h1>
+
+          <button
+            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {playlists.map((playlist) => (
             <div
