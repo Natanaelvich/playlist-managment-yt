@@ -1,8 +1,23 @@
 import axios from "axios";
 
+const api = axios.create({
+  baseURL: "https://www.googleapis.com/youtube/v3",
+});
+
+api.interceptors.request.use(
+  async (config) => {
+    return config;
+  },
+  (error) => {
+    window.location.href = "/";
+
+    return Promise.reject(error);
+  }
+);
+
 export async function fetchMyPlaylists(accessToken: string) {
   try {
-    const response = await axios.get("https://www.googleapis.com/youtube/v3/playlists", {
+    const response = await api.get("playlists", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -17,3 +32,5 @@ export async function fetchMyPlaylists(accessToken: string) {
     console.error("Failed to fetch playlists:", error);
   }
 }
+
+export default api;
