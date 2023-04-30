@@ -7,7 +7,7 @@ const SignInWithGoogle = () => {
   const login = useGoogleLogin({
     flow : 'implicit',
     onSuccess: (tokenResponse) => setToken(tokenResponse.access_token),
-    scope: "https://www.googleapis.com/auth/youtube.readonly",
+    scope: "https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl",
   });
 
   return (
