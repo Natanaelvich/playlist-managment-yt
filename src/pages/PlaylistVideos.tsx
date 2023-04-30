@@ -131,14 +131,14 @@ const PlaylistVideos = () => {
   }
 
   return (
-    <div className="w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-80">
+    <div className="w-full h-full min-h-screen flex justify-center  bg-gray-900 bg-opacity-80">
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden text-gray-200">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-6 text-gray-200">
             Playlist Videos
           </h2>
           {loading ? (
-            <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80">
+            <div className="flex w-screen h-screen justify-center items-center bg-gray-900 bg-opacity-80 rounded-lg">
               <div className="loader"></div>
             </div>
           ) : (
