@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useTokenUserStore } from "../store/tokenUserSlice";
 import { Trash2 } from "react-feather";
+import api from "../services/api";
 
 type Video = {
   id: string;
@@ -35,7 +35,6 @@ type CheckedVideo = {
 
 const PlaylistVideos = () => {
   const { playlistId } = useParams();
-  const { token } = useTokenUserStore();
   const navigate = useNavigate();
 
   const [videos, setVideos] = useState<Video[]>([]);
@@ -53,19 +52,17 @@ const PlaylistVideos = () => {
 
   const deleteVideosFromPlaylist = async () => {
     const videoIds = checkedVideos.map((video) => video.id);
+    const token = localStorage.getItem("token");
 
     try {
-      const response = await axios.delete(
-        "https://www.googleapis.com/youtube/v3/playlistItems",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            id: videoIds.join(","),
-          },
-        }
-      );
+      const response = await api.delete("playlistItems", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          id: videoIds.join(","),
+        },
+      });
 
       console.log(
         `Excluído com sucesso ${response.data.items.length} vídeos da playlist.`
@@ -82,6 +79,7 @@ const PlaylistVideos = () => {
     const fetchPlaylistVideos = async () => {
       try {
         setLoading(true);
+        const token = localStorage.getItem("token");
 
         const response = await axios.get(
           "https://www.googleapis.com/youtube/v3/playlistItems",
@@ -110,7 +108,7 @@ const PlaylistVideos = () => {
     };
 
     fetchPlaylistVideos();
-  }, [playlistId, token]);
+  }, [playlistId]);
 
   if (error) {
     return (
