@@ -1,5 +1,8 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTokenUserStore } from "../store/tokenUserSlice";
+import { Trash2 } from "react-feather";
 
 type Video = {
   id: string;
@@ -26,23 +29,65 @@ type Video = {
   };
 };
 
-type Props = {
-  accessToken: string;
-  playlistId: string;
-  onClose: () => void;
+type CheckedVideo = {
+  id: string;
 };
 
-const PlaylistVideos = ({ accessToken, playlistId, onClose }: Props) => {
+const PlaylistVideos = () => {
+  const { playlistId } = useParams();
+  const { token } = useTokenUserStore();
+  const navigate = useNavigate();
+
   const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [checkedVideos, setCheckedVideos] = useState<CheckedVideo[]>([]);
+
+  const handleVideoChecked = (videoId: string, checked: boolean) => {
+    if (checked) {
+      setCheckedVideos([...checkedVideos, { id: videoId }]);
+    } else {
+      setCheckedVideos(checkedVideos.filter((video) => video.id !== videoId));
+    }
+  };
+
+  const deleteVideosFromPlaylist = async () => {
+    const videoIds = checkedVideos.map((video) => video.id);
+
+    try {
+      const response = await axios.delete(
+        "https://www.googleapis.com/youtube/v3/playlistItems",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            id: videoIds.join(","),
+          },
+        }
+      );
+
+      console.log(
+        `Excluído com sucesso ${response.data.items.length} vídeos da playlist.`
+      );
+
+      setCheckedVideos([]);
+      setVideos(videos.filter((video) => !videoIds.includes(video.id)));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     const fetchPlaylistVideos = async () => {
       try {
+        setLoading(true);
+
         const response = await axios.get(
           "https://www.googleapis.com/youtube/v3/playlistItems",
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
             params: {
               part: "snippet",
@@ -51,68 +96,95 @@ const PlaylistVideos = ({ accessToken, playlistId, onClose }: Props) => {
             },
           }
         );
-        setVideos(response.data.items);
+
+        const videosWithThumbnails = response.data.items.filter(
+          (video: Video) => Object.keys(video.snippet.thumbnails).length > 0
+        );
+
+        setVideos(videosWithThumbnails);
       } catch (error) {
-        console.error(error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPlaylistVideos();
-  }, [accessToken, playlistId]);
+  }, [playlistId, token]);
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80">
+        <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden text-gray-200 p-6">
+          <div className="text-red-500 text-lg font-medium">{error}</div>
+          <div className="mt-6">
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+              onClick={() => navigate("/")}
+            >
+              Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-full flex justify-center items-center z-50 bg-gray-900 bg-opacity-80">
+    <div className="w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-80">
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden text-gray-200">
-        <button
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-200 focus:outline-none"
-          onClick={onClose}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-          >
-            <path
-              fill="currentColor"
-              d="M6.7 5.3a.996.996 0 000 1.41L11.59 12 6.7 16.89a.996.996 0 101.41 1.41L13 13.41l4.89 4.88a.996.996 0 101.41-1.41L14.41 12l4.88-4.89a.996.996 0 10-1.41-1.41L13 10.59 8.11 5.7a.996.996 0 00-1.41 0z"
-            />
-          </svg>
-        </button>
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-6 text-gray-200">
             Playlist Videos
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videos.map((video) => (
-              <div
-                key={video.id}
-                className="bg-gray-700 rounded-lg shadow-md overflow-hidden"
-              >
-                <img
-                  src={video.snippet.thumbnails.medium.url}
-                  alt={video.snippet.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-lg font-medium mb-4 text-gray-200">
-                    {video.snippet.title}
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    {video.snippet.channelTitle}
-                  </p>
-                  <a
-                    href={`https://www.youtube.com/watch?v=${video.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium mt-4 inline-block"
-                  >
-                    Watch Video
-                  </a>
+          {loading ? (
+            <div className="fixed inset-0 z-50 flex justify-center items-center bg-gray-900 bg-opacity-80">
+              <div className="loader"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video) => (
+                <div
+                  key={video.id}
+                  className="bg-gray-700 rounded-lg shadow-md overflow-hidden relative"
+                >
+                  <img
+                    src={video.snippet.thumbnails.medium.url}
+                    alt={video.snippet.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <input
+                    type="checkbox"
+                    className="absolute top-2 right-2 w-5 h-5 appearance-none bg-gray-300 rounded-md checked:bg-blue-500 checked:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+                    onChange={(e) =>
+                      handleVideoChecked(video.id, e.target.checked)
+                    }
+                  />
+                  <div className="p-4">
+                    <h3
+                      className="text-lg font-medium mb-2 text-gray-200 truncate"
+                      title={video.snippet.title}
+                    >
+                      {video.snippet.title}
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-4">
+                      {video.snippet.channelTitle}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {checkedVideos.length > 0 && (
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white py-4 px-8 rounded-md text-2xl font-medium mt-4 fixed bottom-4 right-4 flex items-center space-x-4"
+              onClick={deleteVideosFromPlaylist}
+            >
+              <Trash2 size={32} className="text-white w-12 h-12" />
+              <span className="text-xl">Apagar Videos</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
