@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 type Playlist = {
   kind: string;
@@ -58,8 +58,8 @@ const PlayLists = ({ accessToken }: Props) => {
   useEffect(() => {
     const fetchPlaylists = async () => {
       try {
-        const response = await axios.get(
-          "https://www.googleapis.com/youtube/v3/playlists",
+        const response = await api.get(
+          "playlists",
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

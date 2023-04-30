@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Trash2 } from "react-feather";
@@ -81,8 +80,8 @@ const PlaylistVideos = () => {
         setLoading(true);
         const token = localStorage.getItem("token");
 
-        const response = await axios.get(
-          "https://www.googleapis.com/youtube/v3/playlistItems",
+        const response = await api.get(
+          "playlistItems",
           {
             headers: {
               Authorization: `Bearer ${token}`,
