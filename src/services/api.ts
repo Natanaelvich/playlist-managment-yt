@@ -4,12 +4,16 @@ const api = axios.create({
   baseURL: "https://www.googleapis.com/youtube/v3",
 });
 
-api.interceptors.request.use(
+api.interceptors.response.use(
   async (config) => {
     return config;
   },
   (error) => {
-    window.location.href = "/";
+    if (error.response.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      window.location.reload();
+    }
 
     return Promise.reject(error);
   }
